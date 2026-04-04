@@ -4,24 +4,25 @@
 
 /* ── Variables ── */
 :root {
-  --app-bg:      #0c0a07;
-  --form-bg:     #111009;
-  --form-bord:   #2a2215;
+  --app-bg:      #111008;
+  --form-bg:     #151209;
+  --form-bord:   #2e2518;
   --gold:        #c9a227;
-  --gold-dim:    #7a5e1a;
-  --ink:         #e0d0a0;
-  --ink-dim:     #7a6a4a;
+  --gold-dim:    #8a6e1a;
+  --ink:         #e8d9b0;
+  --ink-dim:     #8a7a5a;
   --input-bg:    #1a1610;
-  --input-focus: rgba(201,162,39,0.18);
+  --input-focus: rgba(201,162,39,0.2);
 
-  --inv-bg:      #0f0d08;
-  --inv-bg2:     #181410;
-  --inv-bord:    #24200e;
+  /* Invoice — match the original design palette exactly */
+  --inv-bg:      #111008;
+  --inv-bg2:     #1a1610;
+  --inv-bord:    #2a2215;
   --inv-gold:    #c9a227;
   --inv-silver:  #9db8d2;
   --inv-ink:     #e8d9b0;
-  --inv-dim:     #6b5e3e;
-  --inv-amber:   #e0901a;
+  --inv-dim:     #8a7a5a;
+  --inv-amber:   #e8a020;
   --inv-green:   #4a9e5c;
 }
 
@@ -89,14 +90,20 @@ body {
   background: var(--form-bg);
   border-right: 1px solid var(--form-bord);
   height: calc(100vh - 44px);
-  overflow-y: auto;
   position: sticky;
   top: 44px;
-  padding: 20px 18px 110px;
+  display: flex;
+  flex-direction: column;
 }
-.form-panel::-webkit-scrollbar { width: 4px; }
-.form-panel::-webkit-scrollbar-track { background: transparent; }
-.form-panel::-webkit-scrollbar-thumb { background: var(--form-bord); border-radius: 2px; }
+
+.form-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 18px 12px;
+}
+.form-scroll::-webkit-scrollbar { width: 4px; }
+.form-scroll::-webkit-scrollbar-track { background: transparent; }
+.form-scroll::-webkit-scrollbar-thumb { background: var(--form-bord); border-radius: 2px; }
 
 /* ── Form Sections ── */
 .fs {
@@ -342,11 +349,10 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
 
 /* ── Export Bar ── */
 .export-bar {
-  position: sticky;
-  bottom: 0;
-  padding: 14px 0 4px;
-  background: linear-gradient(transparent, var(--form-bg) 28%);
-  margin-top: 12px;
+  flex-shrink: 0;
+  padding: 12px 18px 14px;
+  border-top: 1px solid var(--form-bord);
+  background: var(--form-bg);
 }
 #btn-export {
   width: 100%;
@@ -435,7 +441,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   color: var(--inv-gold);
   letter-spacing: 4px;
   text-transform: uppercase;
-  text-shadow: 0 0 30px rgba(201,162,39,0.32);
+  text-shadow: 0 0 20px rgba(201,162,39,0.4);
   margin-bottom: 8px;
 }
 .inv-name.placeholder { opacity: 0.2; }

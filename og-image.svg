@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#c9a227" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#111008" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+      <stop offset="60%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.5"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#111008"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#vignette)"/>
+
+  <!-- Border frame -->
+  <rect x="24" y="24" width="1152" height="582" rx="4" fill="none" stroke="#2a2215" stroke-width="1"/>
+  <rect x="30" y="30" width="1140" height="570" rx="3" fill="none" stroke="#c9a227" stroke-width="0.5" opacity="0.25"/>
+
+  <!-- Corners -->
+  <path d="M50,50 L50,80 M50,50 L80,50" stroke="#c9a227" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M1150,50 L1150,80 M1150,50 L1120,50" stroke="#c9a227" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M50,580 L50,550 M50,580 L80,580" stroke="#c9a227" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M1150,580 L1150,550 M1150,580 L1120,580" stroke="#c9a227" stroke-width="2" fill="none" opacity="0.6"/>
+
+  <!-- Top tag -->
+  <text x="600" y="190" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#c9a227" opacity="0.7" letter-spacing="8">⚔ ALBION ONLINE ⚔</text>
+
+  <!-- Main title -->
+  <text x="600" y="290" text-anchor="middle" font-family="Georgia, serif" font-size="86" font-weight="bold" fill="#c9a227" letter-spacing="12" opacity="0.95">INVOICE</text>
+
+  <!-- Divider line -->
+  <line x1="200" y1="330" x2="1000" y2="330" stroke="#c9a227" stroke-width="0.8" opacity="0.3"/>
+  <text x="600" y="326" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#111008" letter-spacing="2">⚔</text>
+  <rect x="580" y="313" width="40" height="18" fill="#111008"/>
+  <text x="600" y="326" text-anchor="middle" font-family="Georgia, serif" font-size="15" fill="#c9a227" opacity="0.5">⚔</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="385" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#8a7a5a" letter-spacing="4">Préstamos · Islas · Servicios · Guild</text>
+
+  <!-- Bottom tag -->
+  <text x="600" y="470" text-anchor="middle" font-family="Georgia, serif" font-size="15" fill="#8a7a5a" letter-spacing="3" opacity="0.7">aoinvoice.crintech.pro</text>
+
+  <!-- Decorative dots -->
+  <circle cx="370" cy="385" r="3" fill="#c9a227" opacity="0.3"/>
+  <circle cx="830" cy="385" r="3" fill="#c9a227" opacity="0.3"/>
+</svg>

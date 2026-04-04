@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Albion Invoice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">⚔ Albion Invoice</div>
+  <div class="topbar-right">
+    <button id="btn-es" class="lang-btn active">ES</button>
+    <button id="btn-en" class="lang-btn">EN</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- ══ FORM PANEL ══ -->
+  <aside class="form-panel">
+
+    <!-- Emisor -->
+    <section class="fs">
+      <h3 class="fs-title" data-i18n="s_emisor">Emisor</h3>
+      <div class="fr">
+        <label data-i18n="l_tag">Tag / Tipo</label>
+        <select id="emisor-tag-sel">
+          <option value="clan">⚔ Clan ⚔</option>
+          <option value="player">⚔ Jugador ⚔</option>
+          <option value="custom" data-i18n="opt_custom">Personalizado…</option>
+        </select>
+      </div>
+      <div class="fr" id="fr-emisor-custom" style="display:none">
+        <label data-i18n="l_custom_tag">Tag personalizado</label>
+        <input type="text" id="emisor-tag-custom" placeholder="⚔ Guild ⚔">
+      </div>
+      <div class="fr">
+        <label data-i18n="l_name">Nombre</label>
+        <input type="text" id="emisor-name" placeholder="Celtiberos">
+      </div>
+      <div class="fr">
+        <label data-i18n="l_subtitle">Subtítulo</label>
+        <input type="text" id="emisor-subtitle" placeholder="Albion Online · Registro de Préstamos">
+      </div>
+    </section>
+
+    <!-- Receptor -->
+    <section class="fs">
+      <h3 class="fs-title" data-i18n="s_receptor">Receptor</h3>
+      <div class="fr">
+        <label data-i18n="l_tag">Tag / Tipo</label>
+        <select id="receptor-tag-sel">
+          <option value="" data-i18n="opt_none">— Ninguno —</option>
+          <option value="player" data-i18n="opt_player">Jugador</option>
+          <option value="clan">Clan</option>
+          <option value="custom" data-i18n="opt_custom">Personalizado…</option>
+        </select>
+      </div>
+      <div class="fr" id="fr-receptor-custom" style="display:none">
+        <label data-i18n="l_custom_tag">Tag personalizado</label>
+        <input type="text" id="receptor-tag-custom" placeholder="Alianza">
+      </div>
+      <div class="fr">
+        <label data-i18n="l_name">Nombre</label>
+        <input type="text" id="receptor-name" placeholder="Nombre del receptor">
+      </div>
+    </section>
+
+    <!-- Meta -->
+    <section class="fs">
+      <h3 class="fs-title" data-i18n="s_meta">Datos de Factura</h3>
+      <div class="fr">
+        <label data-i18n="l_num">Nº Factura</label>
+        <input type="text" id="inv-num">
+      </div>
+      <div class="fr">
+        <label data-i18n="l_date">Fecha emisión</label>
+        <input type="date" id="inv-date">
+      </div>
+      <div class="fr">
+        <label data-i18n="l_status">Estado</label>
+        <select id="inv-status">
+          <option value="pending" data-i18n="opt_pending">Pendiente</option>
+          <option value="paid" data-i18n="opt_paid">Pagado</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Conceptos -->
+    <section class="fs">
+      <h3 class="fs-title" data-i18n="s_items">Conceptos</h3>
+      <div id="cat-list"></div>
+      <button class="btn-main-add" id="btn-add-cat" data-i18n="btn_add_cat">+ Añadir categoría</button>
+    </section>
+
+    <!-- Pagos -->
+    <section class="fs">
+      <h3 class="fs-title" data-i18n="s_payments">Pagos / Vencimientos</h3>
+      <div id="pay-list"></div>
+      <button class="btn-main-add" id="btn-add-pay" data-i18n="btn_add_pay">+ Añadir pago</button>
+    </section>
+
+    <!-- Notas -->
+    <section class="fs">
+      <h3 class="fs-title" data-i18n="s_notes">Notas al pie</h3>
+      <textarea id="inv-notes" rows="3" placeholder="Observaciones, condiciones, términos…"></textarea>
+    </section>
+
+    <!-- Pie de página -->
+    <section class="fs">
+      <h3 class="fs-title" data-i18n="s_footer">Pie de página</h3>
+      <div class="fr">
+        <label data-i18n="l_footer_text">Texto del pie</label>
+        <input type="text" id="footer-text" placeholder="Albion Online · Est. MMXXVI">
+      </div>
+      <div class="fr-check">
+        <label class="check-label" id="lbl-show-total">
+          <input type="checkbox" id="show-total" checked>
+          <span data-i18n="l_show_total">Mostrar total automático</span>
+        </label>
+      </div>
+      <div class="fr" id="fr-total-label">
+        <label data-i18n="l_total_label">Etiqueta del total</label>
+        <input type="text" id="total-label" data-i18n-ph="ph_total_label" placeholder="Total conceptos">
+      </div>
+    </section>
+
+    <div class="export-bar">
+      <button id="btn-export" data-i18n="btn_export">⬇ Exportar / Imprimir</button>
+    </div>
+
+  </aside>
+
+  <!-- ══ PREVIEW ══ -->
+  <main class="preview-panel">
+    <div id="invoice-root"></div>
+  </main>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

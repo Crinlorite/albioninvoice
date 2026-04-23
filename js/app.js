@@ -77,7 +77,19 @@
       btn_add_cat:  '+ Añadir categoría',
       btn_add_item: '+ Añadir ítem',
       btn_add_pay:  '+ Añadir pago',
-      btn_export:   '⬇ Exportar / Imprimir',
+      btn_export:   '⬇ Imprimir',
+      btn_copy_code: '📋 Código',
+      btn_copy_url:  '🔗 URL',
+      btn_import:    '📥 Cargar',
+      import_title:        'Cargar factura desde código',
+      import_placeholder:  'Pega aquí el código AINV1-… que te hayan enviado',
+      import_confirm:      'Cargar',
+      import_cancel:       'Cancelar',
+      msg_copied_code:     'Código copiado al portapapeles',
+      msg_copied_url:      'URL copiada al portapapeles',
+      msg_invalid_code:    'Código no válido',
+      msg_loaded:          'Factura cargada desde código',
+      msg_copy_failed:     'No se pudo copiar — usa Ctrl+C',
       ph_cat:        'Ej: Alquiler de Islas',
       ph_item_name:  'Nombre del concepto',
       ph_item_note:  'Nota adicional',
@@ -123,7 +135,19 @@
       btn_add_cat:  '+ Add Category',
       btn_add_item: '+ Add Item',
       btn_add_pay:  '+ Add Payment',
-      btn_export:   '⬇ Export / Print',
+      btn_export:   '⬇ Print',
+      btn_copy_code: '📋 Code',
+      btn_copy_url:  '🔗 URL',
+      btn_import:    '📥 Load',
+      import_title:        'Load invoice from code',
+      import_placeholder:  'Paste the AINV1-… code you received',
+      import_confirm:      'Load',
+      import_cancel:       'Cancel',
+      msg_copied_code:     'Code copied to clipboard',
+      msg_copied_url:      'URL copied to clipboard',
+      msg_invalid_code:    'Invalid code',
+      msg_loaded:          'Invoice loaded from code',
+      msg_copy_failed:     'Copy failed — use Ctrl+C',
       ph_cat:        'E.g. Island Rentals',
       ph_item_name:  'Item / service name',
       ph_item_note:  'Additional note',
@@ -429,6 +453,10 @@
       const k = el.dataset.i18n;
       if (T[S.lang][k] !== undefined) el.textContent = T[S.lang][k];
     });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const k = el.dataset.i18nPlaceholder;
+      if (T[S.lang][k] !== undefined) el.placeholder = T[S.lang][k];
+    });
 
     // Update select option texts
     const eTagSel = document.getElementById('emisor-tag-sel');
@@ -511,6 +539,156 @@
     });
   }
 
+  /* ── Share codec: AINV1-<base64url(deflate-raw(JSON(S)))> ──
+     Entirely client-side, no backend, no storage. A sender encodes
+     the current invoice state into a single long string they paste
+     to the receiver (or shares as a URL with ?inv=…). The receiver
+     pastes it into "Cargar código" (or clicks the URL) and their
+     browser reconstructs the form exactly. Nothing leaves either
+     device through our infrastructure. */
+
+  const CODE_PREFIX = 'AINV1-';
+
+  function bytesToBase64Url(bytes) {
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function base64UrlToBytes(str) {
+    const pad = str.length % 4 === 2 ? '==' : str.length % 4 === 3 ? '=' : '';
+    const bin = atob(str.replace(/-/g, '+').replace(/_/g, '/') + pad);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  async function encodeInvoice(state) {
+    const json = JSON.stringify(state);
+    const bytes = new TextEncoder().encode(json);
+    const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+    return CODE_PREFIX + bytesToBase64Url(compressed);
+  }
+
+  async function decodeInvoice(code) {
+    const trimmed = String(code || '').trim();
+    if (!trimmed.startsWith(CODE_PREFIX)) throw new Error('bad prefix');
+    const bytes = base64UrlToBytes(trimmed.slice(CODE_PREFIX.length));
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    const text = await new Response(stream).text();
+    const parsed = JSON.parse(text);
+    if (!parsed || typeof parsed !== 'object' || !parsed.emisor) throw new Error('bad shape');
+    return parsed;
+  }
+
+  /* Take a decoded state object and reflect it into the live form. */
+  function applyState(newS) {
+    if (newS.lang && T[newS.lang]) S.lang = newS.lang;
+    Object.assign(S.emisor,   newS.emisor   || {});
+    Object.assign(S.receptor, newS.receptor || {});
+    Object.assign(S.inv,      newS.inv      || {});
+    Object.assign(S.footer,   newS.footer   || {});
+    S.categories = Array.isArray(newS.categories) ? newS.categories : [];
+    S.payments   = Array.isArray(newS.payments)   ? newS.payments   : [];
+    S.notes      = typeof newS.notes === 'string' ? newS.notes      : '';
+
+    // Push _uid past every id already assigned so new rows don't collide.
+    let maxId = 0;
+    S.categories.forEach(c => {
+      maxId = Math.max(maxId, +c.id || 0);
+      (c.items || []).forEach(i => { maxId = Math.max(maxId, +i.id || 0); });
+    });
+    S.payments.forEach(p => { maxId = Math.max(maxId, +p.id || 0); });
+    _uid = maxId;
+
+    // Static inputs — mirror state into the DOM.
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+    setVal('emisor-name',         S.emisor.name);
+    setVal('emisor-subtitle',     S.emisor.subtitle);
+    setVal('emisor-tag-sel',      S.emisor.tagSel);
+    setVal('emisor-tag-custom',   S.emisor.tagCustom);
+    setVal('receptor-name',       S.receptor.name);
+    setVal('receptor-tag-sel',    S.receptor.tagSel);
+    setVal('receptor-tag-custom', S.receptor.tagCustom);
+    setVal('inv-num',             S.inv.number);
+    setVal('inv-date',            S.inv.date);
+    setVal('inv-status',          S.inv.status);
+    setVal('inv-notes',           S.notes);
+    setVal('footer-text',         S.footer.text);
+    setVal('total-label',         S.footer.totalLabel);
+
+    const showTotal = document.getElementById('show-total');
+    if (showTotal) showTotal.checked = !!S.footer.showTotal;
+    const frEmisorCustom   = document.getElementById('fr-emisor-custom');
+    const frReceptorCustom = document.getElementById('fr-receptor-custom');
+    const frTotalLabel     = document.getElementById('fr-total-label');
+    if (frEmisorCustom)   frEmisorCustom.style.display   = S.emisor.tagSel === 'custom' ? '' : 'none';
+    if (frReceptorCustom) frReceptorCustom.style.display = S.receptor.tagSel === 'custom' ? '' : 'none';
+    if (frTotalLabel)     frTotalLabel.style.display     = S.footer.showTotal ? '' : 'none';
+
+    const btnES = document.getElementById('btn-es');
+    const btnEN = document.getElementById('btn-en');
+    if (btnES) btnES.classList.toggle('active', S.lang === 'es');
+    if (btnEN) btnEN.classList.toggle('active', S.lang === 'en');
+
+    // applyI18n re-renders cat list, pay list and the invoice itself.
+    applyI18n();
+  }
+
+  /* Minimal toast for share-action feedback — auto-hides after 1.8s. */
+  let _toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.hidden = false;
+    // force reflow so the transition re-triggers on consecutive toasts
+    void el.offsetWidth;
+    el.classList.add('visible');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => {
+      el.classList.remove('visible');
+      setTimeout(() => { el.hidden = true; }, 300);
+    }, 1800);
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {
+      // Fallback: temp textarea + execCommand.
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (_) {}
+      document.body.removeChild(ta);
+      return ok;
+    }
+  }
+
+  function openImportModal() {
+    const modal = document.getElementById('import-modal');
+    if (!modal) return;
+    const ta = document.getElementById('import-textarea');
+    if (ta) ta.value = '';
+    modal.hidden = false;
+    requestAnimationFrame(() => modal.classList.add('visible'));
+    if (ta) setTimeout(() => ta.focus(), 30);
+  }
+
+  function closeImportModal() {
+    const modal = document.getElementById('import-modal');
+    if (!modal) return;
+    modal.classList.remove('visible');
+    setTimeout(() => { modal.hidden = true; }, 200);
+  }
+
   /* ── Layout: split form into two panels on wide desktops ──
      At ≥1500px the invoice form is split across two asides, one on
      each side of the preview. The "right group" sections (Conceptos /
@@ -548,7 +726,7 @@
   });
 
   /* ── Init ── */
-  function init() {
+  async function init() {
     /* Set initial values */
     document.getElementById('inv-date').value  = S.inv.date;
     document.getElementById('inv-num').value   = S.inv.number;
@@ -624,14 +802,83 @@
       applyI18n();
     });
 
-    /* Export */
+    /* Export (print) */
     document.getElementById('btn-export').addEventListener('click', () => window.print());
 
-    /* Seed initial content */
-    addCat();
-    renderCatList();
-    addPayment();
-    renderPayList();
+    /* Share: copy code to clipboard */
+    document.getElementById('btn-copy-code').addEventListener('click', async () => {
+      try {
+        const code = await encodeInvoice(S);
+        const ok = await copyToClipboard(code);
+        toast(ok ? t('msg_copied_code') : t('msg_copy_failed'));
+      } catch (_) {
+        toast(t('msg_copy_failed'));
+      }
+    });
+
+    /* Share: copy a ?inv=<code> URL to clipboard */
+    document.getElementById('btn-copy-url').addEventListener('click', async () => {
+      try {
+        const code = await encodeInvoice(S);
+        const url = `${location.origin}${location.pathname}?inv=${encodeURIComponent(code)}`;
+        const ok = await copyToClipboard(url);
+        toast(ok ? t('msg_copied_url') : t('msg_copy_failed'));
+      } catch (_) {
+        toast(t('msg_copy_failed'));
+      }
+    });
+
+    /* Import: open modal */
+    document.getElementById('btn-import-code').addEventListener('click', openImportModal);
+    document.getElementById('btn-import-cancel').addEventListener('click', closeImportModal);
+    document.getElementById('import-modal').addEventListener('click', e => {
+      if (e.target.id === 'import-modal') closeImportModal();
+    });
+    document.getElementById('btn-import-confirm').addEventListener('click', async () => {
+      const ta = document.getElementById('import-textarea');
+      const raw = ta ? ta.value : '';
+      try {
+        const newS = await decodeInvoice(raw);
+        applyState(newS);
+        closeImportModal();
+        toast(t('msg_loaded'));
+      } catch (_) {
+        toast(t('msg_invalid_code'));
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('import-modal');
+        if (modal && !modal.hidden) closeImportModal();
+      }
+    });
+
+    /* Auto-load invoice from ?inv=<code> so shared URLs open pre-filled. */
+    let urlLoaded = false;
+    const params = new URLSearchParams(location.search);
+    const invCode = params.get('inv');
+    if (invCode) {
+      try {
+        const newS = await decodeInvoice(invCode);
+        applyState(newS);
+        urlLoaded = true;
+        toast(t('msg_loaded'));
+        // Clean the URL so refreshing doesn't re-toast and so the
+        // user can edit without the code staying sticky in the bar.
+        const clean = location.pathname + location.hash;
+        history.replaceState(null, '', clean);
+      } catch (_) {
+        toast(t('msg_invalid_code'));
+      }
+    }
+
+    /* Seed initial content only if the URL didn't populate state. */
+    if (!urlLoaded) {
+      addCat();
+      renderCatList();
+      addPayment();
+      renderPayList();
+    }
     renderInvoice();
 
     /* Place form sections into left/right panel for current viewport. */

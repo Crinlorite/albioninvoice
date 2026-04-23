@@ -718,9 +718,45 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   text-shadow: 0 0 10px rgba(201, 162, 39, 0.45);
 }
 
-/* Central Export button — the main action lives here now. */
-.crintech-family .family-export {
+/* Central action group — three share buttons + the gold Print pill. */
+.crintech-family .family-actions {
   justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Secondary outlined pills (Copy code / Copy URL / Load). */
+.crintech-family .family-share-btn {
+  background: transparent;
+  color: rgba(232, 217, 176, 0.9);
+  border: 1px solid rgba(201, 162, 39, 0.55);
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  padding: 8px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.crintech-family .family-share-btn:hover {
+  background: rgba(201, 162, 39, 0.14);
+  color: #e6c14f;
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+.crintech-family .family-share-btn:active {
+  background: rgba(201, 162, 39, 0.22);
+  transform: translateY(0);
+}
+
+/* Primary: Export / Print (gold pill). */
+.crintech-family .family-export {
   background: var(--gold);
   color: #0c0a07;
   border: 1px solid rgba(232, 217, 176, 0.25);
@@ -751,8 +787,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
 }
 
 @media (max-width: 700px) {
-  /* Narrow: stack the footer — export on top (full width), family
-     strip underneath, centred. */
+  /* Narrow: stack the footer — actions on top, family strip below. */
   .crintech-family {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -767,11 +802,153 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
     justify-content: center;
     gap: 4px 12px;
   }
-  .crintech-family .family-export {
+  .crintech-family .family-actions {
     order: -1;
     width: 100%;
-    max-width: 360px;
-    justify-self: center;
+    justify-self: stretch;
+    gap: 6px;
+  }
+  .crintech-family .family-export {
+    flex: 1 1 100%;
     padding: 11px 18px;
   }
+  .crintech-family .family-share-btn {
+    flex: 1 1 0;
+    min-width: 80px;
+    padding: 8px 10px;
+    font-size: 10px;
+    letter-spacing: 1.4px;
+  }
+}
+
+/* ══ Import modal + toast ══ */
+.import-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 6, 4, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.import-modal.visible { opacity: 1; }
+.import-modal[hidden] { display: none; }
+
+.import-modal-inner {
+  width: 100%;
+  max-width: 540px;
+  background: var(--form-bg);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  border-radius: 6px;
+  padding: 22px 22px 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(201, 162, 39, 0.15);
+  transform: translateY(6px);
+  transition: transform 0.2s ease;
+}
+.import-modal.visible .import-modal-inner { transform: translateY(0); }
+
+.import-modal-title {
+  margin: 0 0 14px;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.import-modal-textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 130px;
+  font-family: Consolas, Menlo, Monaco, 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  background: rgba(8, 6, 4, 0.6);
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  border-radius: 3px;
+  color: var(--ink);
+  padding: 11px 13px;
+  resize: vertical;
+  word-break: break-all;
+}
+.import-modal-textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.35);
+}
+
+.import-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.import-modal-btn-cancel,
+.import-modal-btn-confirm {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  padding: 9px 18px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s ease;
+}
+.import-modal-btn-cancel {
+  background: transparent;
+  color: rgba(232, 217, 176, 0.75);
+  border: 1px solid rgba(201, 162, 39, 0.35);
+}
+.import-modal-btn-cancel:hover {
+  color: var(--ink);
+  border-color: var(--gold-dim);
+}
+.import-modal-btn-confirm {
+  background: var(--gold);
+  color: #0c0a07;
+  border: 1px solid rgba(232, 217, 176, 0.3);
+  box-shadow: 0 3px 12px rgba(201, 162, 39, 0.3);
+}
+.import-modal-btn-confirm:hover { background: #e8b82a; }
+
+/* Toast: floating pill that announces share-action results. */
+.toast {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-12px);
+  z-index: 400;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: rgba(10, 8, 5, 0.96);
+  border: 1px solid rgba(201, 162, 39, 0.55);
+  color: var(--gold);
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(201, 162, 39, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast[hidden] { display: none; }
+
+@media print {
+  .import-modal,
+  .toast { display: none !important; }
 }

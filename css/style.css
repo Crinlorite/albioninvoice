@@ -101,7 +101,9 @@ body {
   flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 20px 18px 12px;
+  /* bottom padding reserves clearance for the fixed family footer
+     (≈64px tall) so the last item doesn't render behind it. */
+  padding: 20px 18px 80px;
 }
 .form-scroll::-webkit-scrollbar { width: 4px; }
 .form-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -375,7 +377,8 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
 /* ── Preview Panel ── */
 .preview-panel {
   flex: 1;
-  padding: 40px 32px;
+  /* same rationale: inner padding-bottom clears the fixed footer. */
+  padding: 40px 32px 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -677,9 +680,15 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   justify-self: start;
 }
 
-/* Reservar espacio inferior para que el fixed footer no tape contenido */
-body { padding-bottom: 64px; }
-@media (max-width: 700px) { body { padding-bottom: 120px; } }
+/* No body padding-bottom — that caused a rogue ~64px scroll at the
+   bottom with nothing there. Footer clearance is handled inside each
+   scroll container instead (.form-scroll / .preview-panel). On narrow
+   screens the footer stacks and gets taller, so the scrollers give
+   it a bigger clearance there. */
+@media (max-width: 700px) {
+  .form-scroll { padding-bottom: 140px; }
+  .preview-panel { padding-bottom: 140px; }
+}
 
 .crintech-family .family-label {
   font-family: 'Cinzel', serif;

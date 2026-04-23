@@ -36,7 +36,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 
@@ -166,10 +166,6 @@
 
   </div><!-- /form-scroll -->
 
-    <div class="export-bar">
-      <button id="btn-export" data-i18n="btn_export">⬇ Exportar / Imprimir</button>
-    </div>
-
   </aside>
 
   <!-- ══ PREVIEW ══ -->
@@ -187,15 +183,21 @@
 
 </div>
 
-<!-- ══ De la misma familia — cross-promo discreta, full-width al pie ══ -->
+<!-- ══ Footer: family cross-promo + export button central ══
+     Grid [1fr auto 1fr] so the Export button stays dead-centre while
+     the family strip floats to the left edge. Button lives here so
+     the form panels don't have to reserve bottom space. -->
 <footer class="crintech-family">
-  <span class="family-label" data-i18n="family_label">De la misma familia</span>
-  <nav class="family-links">
-    <a href="https://royalforge.crintech.pro" target="_blank" rel="noopener">⚒️ Royal Forge</a>
-    <a href="https://chromewebstore.google.com/detail/royal-search/ahhnoloclfmglfbflaliljodonbbpbmc" target="_blank" rel="noopener">🔍 Royal Search</a>
-    <a href="https://vigil.crintech.pro" target="_blank" rel="noopener">👁️ Vigil</a>
-    <a href="https://avalon.crintech.pro" target="_blank" rel="noopener">🌀 Avalon Tracker</a>
-  </nav>
+  <div class="family-side">
+    <span class="family-label" data-i18n="family_label">De la misma familia</span>
+    <nav class="family-links">
+      <a href="https://royalforge.crintech.pro" target="_blank" rel="noopener">⚒️ Royal Forge</a>
+      <a href="https://chromewebstore.google.com/detail/royal-search/ahhnoloclfmglfbflaliljodonbbpbmc" target="_blank" rel="noopener">🔍 Royal Search</a>
+      <a href="https://vigil.crintech.pro" target="_blank" rel="noopener">👁️ Vigil</a>
+      <a href="https://avalon.crintech.pro" target="_blank" rel="noopener">🌀 Avalon Tracker</a>
+    </nav>
+  </div>
+  <button id="btn-export" class="family-export" data-i18n="btn_export">⬇ Exportar / Imprimir</button>
 </footer>
 
 <script src="js/app.js"></script>

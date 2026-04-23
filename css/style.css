@@ -369,28 +369,6 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
 .hl-toggle input { display: none; }
 
 /* ── Export Bar ── */
-.export-bar {
-  flex-shrink: 0;
-  padding: 12px 18px 14px;
-  border-top: 1px solid var(--form-bord);
-  background: var(--form-bg);
-}
-#btn-export {
-  width: 100%;
-  background: var(--gold);
-  border: none;
-  color: #0c0a07;
-  font-family: 'Cinzel', Georgia, serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  padding: 13px;
-  border-radius: 3px;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: background 0.15s;
-}
-#btn-export:hover { background: #e8b82a; }
 
 /* ── Preview Panel ── */
 .preview-panel {
@@ -673,12 +651,11 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   z-index: 300 !important;
   transform: translateZ(0);
   will-change: transform;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px 22px;
-  padding: 12px 22px;
+  gap: 18px;
+  padding: 10px 22px;
   border-top: 1px solid rgba(201, 162, 39, 0.45);
   background: linear-gradient(180deg, rgba(10, 8, 5, 0.85) 0%, rgba(10, 8, 5, 0.98) 100%);
   backdrop-filter: blur(12px) saturate(130%);
@@ -689,9 +666,17 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   color: rgba(232, 217, 176, 0.9);
 }
 
+.crintech-family .family-side {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  justify-self: start;
+}
+
 /* Reservar espacio inferior para que el fixed footer no tape contenido */
-body { padding-bottom: 62px; }
-@media (max-width: 600px) { body { padding-bottom: 84px; } }
+body { padding-bottom: 64px; }
+@media (max-width: 700px) { body { padding-bottom: 120px; } }
 
 .crintech-family .family-label {
   font-family: 'Cinzel', serif;
@@ -705,7 +690,7 @@ body { padding-bottom: 62px; }
 .crintech-family .family-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 18px;
+  gap: 6px 16px;
 }
 
 .crintech-family .family-links a {
@@ -721,16 +706,60 @@ body { padding-bottom: 62px; }
   text-shadow: 0 0 10px rgba(201, 162, 39, 0.45);
 }
 
+/* Central Export button — the main action lives here now. */
+.crintech-family .family-export {
+  justify-self: center;
+  background: var(--gold);
+  color: #0c0a07;
+  border: 1px solid rgba(232, 217, 176, 0.25);
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  padding: 9px 22px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 3px 12px rgba(201, 162, 39, 0.3), 0 0 0 1px rgba(201, 162, 39, 0.45);
+}
+.crintech-family .family-export:hover {
+  background: #e8b82a;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(201, 162, 39, 0.5), 0 0 0 1px rgba(232, 217, 176, 0.5);
+}
+.crintech-family .family-export:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(201, 162, 39, 0.25);
+}
+
 @media print {
   .crintech-family { display: none !important; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
+  /* Narrow: stack the footer — export on top (full width), family
+     strip underneath, centred. */
   .crintech-family {
-    padding: 12px 14px;
-    gap: 6px 12px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 14px;
+  }
+  .crintech-family .family-side {
+    justify-self: center;
+    justify-content: center;
+    text-align: center;
   }
   .crintech-family .family-links {
+    justify-content: center;
     gap: 4px 12px;
+  }
+  .crintech-family .family-export {
+    order: -1;
+    width: 100%;
+    max-width: 360px;
+    justify-self: center;
+    padding: 11px 18px;
   }
 }

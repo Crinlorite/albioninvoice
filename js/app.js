@@ -511,6 +511,47 @@
     });
   }
 
+  /* ── Layout: split form into two panels on wide desktops ──
+     At ≥1500px the invoice form is split across two asides, one on
+     each side of the preview. The "right group" sections (Conceptos /
+     Pagos / Notas / Pie) and the Export bar move to the right panel.
+     Below the breakpoint everything collapses back into the left. */
+  const RIGHT_GROUP_KEYS = ['s_items', 's_payments', 's_notes', 's_footer'];
+
+  function adjustFormLayout() {
+    const wide = window.matchMedia('(min-width: 1500px)').matches;
+    const left = document.querySelector('.form-panel-left');
+    const right = document.querySelector('.form-panel-right');
+    if (!left || !right) return;
+    const leftScroll = left.querySelector('.form-scroll');
+    const rightScroll = right.querySelector('.form-scroll');
+    const exportBar = document.querySelector('.export-bar');
+    if (!leftScroll || !rightScroll) return;
+
+    if (wide) {
+      // Move right-group sections into the right panel (preserving order).
+      leftScroll.querySelectorAll('section.fs').forEach(s => {
+        const title = s.querySelector('.fs-title');
+        const key = title && title.getAttribute('data-i18n');
+        if (RIGHT_GROUP_KEYS.includes(key)) rightScroll.appendChild(s);
+      });
+      if (exportBar && exportBar.parentElement !== right) right.appendChild(exportBar);
+    } else {
+      // Collapse: pull right-group sections back into the left panel
+      // BEFORE the export bar (which must stay at the bottom).
+      rightScroll.querySelectorAll('section.fs').forEach(s => {
+        leftScroll.appendChild(s);
+      });
+      if (exportBar && exportBar.parentElement !== left) left.appendChild(exportBar);
+    }
+  }
+
+  let _layoutTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(_layoutTimer);
+    _layoutTimer = setTimeout(adjustFormLayout, 120);
+  });
+
   /* ── Init ── */
   function init() {
     /* Set initial values */
@@ -597,6 +638,9 @@
     addPayment();
     renderPayList();
     renderInvoice();
+
+    /* Place form sections into left/right panel for current viewport. */
+    adjustFormLayout();
   }
 
   document.addEventListener('DOMContentLoaded', init);

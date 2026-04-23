@@ -104,24 +104,24 @@ body {
 .form-scroll::-webkit-scrollbar { width: 4px; }
 .form-scroll::-webkit-scrollbar-track { background: transparent; }
 
-/* Split the form panel into two balanced columns on wide desktops
-   so every section is visible at a glance without scrolling. CSS
-   columns auto-balance the 7 sections; break-inside: avoid keeps
-   each section intact. The preview still gets >= 800px next to it. */
+/* ══ 3-column layout on wide desktops ══
+   Form panel splits into two asides, one on each side of the preview.
+   Left keeps the parties (Emisor / Receptor / Datos de Factura). Right
+   holds the content (Conceptos / Pagos / Notas / Pie) plus the Export
+   bar. JS handles moving sections between them on resize. */
+.form-panel-right {
+  border-right: none;
+  border-left: 1px solid var(--form-bord);
+}
+@media (max-width: 1499px) {
+  /* Below breakpoint: right panel hidden, everything stays in left. */
+  .form-panel-right { display: none; }
+}
 @media (min-width: 1500px) {
-  .form-panel {
-    width: min(46vw, 760px);
-    min-width: 720px;
-  }
-  .form-scroll {
-    column-count: 2;
-    column-gap: 30px;
-    padding: 22px 22px 12px;
-  }
-  .form-scroll .fs {
-    break-inside: avoid;
-    -webkit-column-break-inside: avoid;
-    page-break-inside: avoid;
+  .form-panel-left,
+  .form-panel-right {
+    width: 340px;
+    min-width: 320px;
   }
 }
 .form-scroll::-webkit-scrollbar-thumb { background: var(--form-bord); border-radius: 2px; }

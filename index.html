@@ -36,7 +36,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 
@@ -55,7 +55,7 @@
 <div class="layout">
 
   <!-- ══ FORM PANEL ══ -->
-  <aside class="form-panel">
+  <aside class="form-panel form-panel-left">
   <div class="form-scroll">
 
     <!-- Emisor -->
@@ -176,6 +176,14 @@
   <main class="preview-panel">
     <div id="invoice-root"></div>
   </main>
+
+  <!-- ══ FORM PANEL (right, wide desktop only) ══
+       Populated by JS at ≥1500px with Conceptos / Pagos / Notas / Pie.
+       Below that breakpoint it is hidden and those sections stay in
+       the left panel. -->
+  <aside class="form-panel form-panel-right">
+    <div class="form-scroll"></div>
+  </aside>
 
 </div>
 

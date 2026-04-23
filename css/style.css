@@ -63,18 +63,18 @@ body {
 .lang-btn {
   background: none;
   border: 1px solid var(--form-bord);
-  color: var(--ink-dim);
-  font-size: 11px;
-  font-weight: bold;
-  font-family: 'Cinzel', Georgia, serif;
-  padding: 3px 10px;
+  padding: 3px 5px;
   cursor: pointer;
-  border-radius: 2px;
-  letter-spacing: 1px;
+  border-radius: 3px;
   transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.55;
 }
-.lang-btn.active { background: var(--gold); border-color: var(--gold); color: #0c0a07; }
-.lang-btn:hover:not(.active) { border-color: var(--gold-dim); color: var(--ink); }
+.lang-btn svg { display: block; border-radius: 1.5px; }
+.lang-btn.active { border-color: var(--gold); opacity: 1; box-shadow: 0 0 0 1px var(--gold), 0 0 10px rgba(201, 162, 39, 0.35); }
+.lang-btn:hover:not(.active) { border-color: var(--gold-dim); opacity: 0.9; }
 
 /* ── Layout ── */
 .layout {
@@ -640,46 +640,62 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   @page { margin: 10mm; size: A4; }
 }
 
-/* ══ Crintech family — cross-promo strip al pie.
-   Diseño deliberadamente pequeño: una fila inline, sin dominar. Hidden
-   al imprimir para no ensuciar el PDF exportado. */
+/* ══ Crintech family — sticky cross-promo al pie, siempre visible.
+   Fixed al bottom para maximizar visibilidad. Hidden al imprimir
+   para no ensuciar el PDF exportado. La app-layout añade padding
+   inferior equivalente para que el contenido no quede oculto. */
 .crintech-family {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px 20px;
-  padding: 14px 20px;
-  border-top: 1px solid rgba(201, 162, 39, 0.15);
-  background: rgba(0, 0, 0, 0.3);
+  gap: 10px 22px;
+  padding: 12px 22px;
+  border-top: 1px solid rgba(201, 162, 39, 0.45);
+  background: linear-gradient(180deg, rgba(10, 8, 5, 0.82) 0%, rgba(10, 8, 5, 0.97) 100%);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.55), 0 -1px 0 rgba(201, 162, 39, 0.15), 0 -18px 36px -18px rgba(201, 162, 39, 0.22);
   font-family: 'EB Garamond', serif;
-  font-size: 13px;
-  color: rgba(232, 217, 176, 0.55);
+  font-size: 14px;
+  color: rgba(232, 217, 176, 0.85);
 }
+
+/* Reservar espacio inferior para que el fixed footer no tape contenido */
+body { padding-bottom: 62px; }
+@media (max-width: 600px) { body { padding-bottom: 84px; } }
 
 .crintech-family .family-label {
   font-family: 'Cinzel', serif;
   font-size: 11px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(201, 162, 39, 0.7);
+  color: rgba(201, 162, 39, 0.95);
+  text-shadow: 0 0 14px rgba(201, 162, 39, 0.35);
 }
 
 .crintech-family .family-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 16px;
+  gap: 6px 18px;
 }
 
 .crintech-family .family-links a {
-  color: rgba(232, 217, 176, 0.78);
+  color: rgba(232, 217, 176, 0.92);
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .crintech-family .family-links a:hover {
-  color: #c9a227;
+  color: #e6c14f;
+  text-shadow: 0 0 10px rgba(201, 162, 39, 0.45);
 }
 
 @media print {

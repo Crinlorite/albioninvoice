@@ -94,6 +94,7 @@
       tag_player:  '⚔ Jugador ⚔',
       tag_clan_r:  'Clan',
       tag_player_r:'Jugador',
+      family_label: 'De la misma familia',
     },
     en: {
       s_emisor:   'Issuer',
@@ -137,6 +138,7 @@
       pay_default:  'Payment',
       tag_clan:    '⚔ Clan ⚔',
       tag_player:  '⚔ Player ⚔',
+      family_label: 'From the same family',
       tag_clan_r:  'Clan',
       tag_player_r:'Player',
     },

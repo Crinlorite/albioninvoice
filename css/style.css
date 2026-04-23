@@ -639,3 +639,59 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
 
   @page { margin: 10mm; size: A4; }
 }
+
+/* ══ Crintech family — cross-promo strip al pie.
+   Diseño deliberadamente pequeño: una fila inline, sin dominar. Hidden
+   al imprimir para no ensuciar el PDF exportado. */
+.crintech-family {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 20px;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(201, 162, 39, 0.15);
+  background: rgba(0, 0, 0, 0.3);
+  font-family: 'EB Garamond', serif;
+  font-size: 13px;
+  color: rgba(232, 217, 176, 0.55);
+}
+
+.crintech-family .family-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(201, 162, 39, 0.7);
+}
+
+.crintech-family .family-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.crintech-family .family-links a {
+  color: rgba(232, 217, 176, 0.78);
+  text-decoration: none;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+.crintech-family .family-links a:hover {
+  color: #c9a227;
+}
+
+@media print {
+  .crintech-family { display: none !important; }
+}
+
+@media (max-width: 600px) {
+  .crintech-family {
+    padding: 12px 14px;
+    gap: 6px 12px;
+  }
+  .crintech-family .family-links {
+    gap: 4px 12px;
+  }
+}

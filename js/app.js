@@ -802,8 +802,38 @@
       applyI18n();
     });
 
-    /* Export (print) */
-    document.getElementById('btn-export').addEventListener('click', () => window.print());
+    /* Export to PDF (direct download, no print dialog) */
+    document.getElementById('btn-export').addEventListener('click', () => {
+      const el = document.querySelector('#invoice-root .invoice');
+      if (!el) return;
+
+      const safeNum = (S.inv.number || 'factura').replace(/[^a-zA-Z0-9._-]/g, '_');
+      const filename = `${safeNum}.pdf`;
+
+      const opt = {
+        margin:       0,
+        filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, backgroundColor: '#111008', useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
+      };
+
+      const btn = document.getElementById('btn-export');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ ...';
+
+      html2pdf().set(opt).from(el).save()
+        .catch(err => {
+          console.error('PDF export failed:', err);
+          window.print(); // fallback
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btn.textContent = originalText;
+        });
+    });
 
     /* Share: copy code to clipboard */
     document.getElementById('btn-copy-code').addEventListener('click', async () => {

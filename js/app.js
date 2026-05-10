@@ -77,10 +77,13 @@
       btn_add_cat:  '+ Añadir categoría',
       btn_add_item: '+ Añadir ítem',
       btn_add_pay:  '+ Añadir pago',
-      btn_export:    '⬇ Exportar a PDF',
-      btn_copy_code: '📋 Copiar código',
-      btn_copy_url:  '🔗 Compartir URL',
-      btn_import:    '📥 Cargar código',
+      btn_copy_image: '📸 Copiar imagen',
+      btn_copy_code:  '📋 Copiar código',
+      btn_copy_url:   '🔗 Compartir URL',
+      btn_import:     '📥 Cargar código',
+      msg_copied_image: 'Imagen copiada al portapapeles',
+      msg_image_downloaded: 'Imagen descargada — ya la puedes compartir',
+      msg_image_failed: 'No se pudo generar la imagen',
       import_title:        'Cargar factura desde código',
       import_placeholder:  'Pega aquí el código AINV1-… que te hayan enviado',
       import_confirm:      'Cargar',
@@ -135,9 +138,12 @@
       btn_add_cat:  '+ Add Category',
       btn_add_item: '+ Add Item',
       btn_add_pay:  '+ Add Payment',
-      btn_export:    '⬇ Export to PDF',
-      btn_copy_code: '📋 Copy code',
-      btn_copy_url:  '🔗 Share URL',
+      btn_copy_image: '📸 Copy image',
+      btn_copy_code:  '📋 Copy code',
+      btn_copy_url:   '🔗 Share URL',
+      msg_copied_image:     'Image copied to clipboard',
+      msg_image_downloaded: 'Image downloaded — share it anywhere',
+      msg_image_failed:     'Could not render the image',
       btn_import:    '📥 Load code',
       import_title:        'Load invoice from code',
       import_placeholder:  'Paste the AINV1-… code you received',
@@ -802,37 +808,75 @@
       applyI18n();
     });
 
-    /* Export to PDF (direct download, no print dialog) */
-    document.getElementById('btn-export').addEventListener('click', () => {
+    /* Copy invoice as image to clipboard, with download fallback.
+       html2canvas ships inside the html2pdf bundle so we don't pull in
+       a second dependency. The clipboard write API requires HTTPS +
+       user gesture (we're inside a click handler — fine), works on
+       Chrome/Edge/Firefox. Safari-iOS and any browser without
+       ClipboardItem fall back to a PNG download so the user can still
+       share it from the Files / Photos app. */
+    document.getElementById('btn-copy-image').addEventListener('click', async () => {
       const el = document.querySelector('#invoice-root .invoice');
       if (!el) return;
 
-      const safeNum = (S.inv.number || 'factura').replace(/[^a-zA-Z0-9._-]/g, '_');
-      const filename = `${safeNum}.pdf`;
-
-      const opt = {
-        margin:       0,
-        filename,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, backgroundColor: '#111008', useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
-      };
-
-      const btn = document.getElementById('btn-export');
+      const btn = document.getElementById('btn-copy-image');
       const originalText = btn.textContent;
       btn.disabled = true;
       btn.textContent = '⏳ ...';
 
-      html2pdf().set(opt).from(el).save()
-        .catch(err => {
-          console.error('PDF export failed:', err);
-          window.print(); // fallback
-        })
-        .finally(() => {
-          btn.disabled = false;
-          btn.textContent = originalText;
+      try {
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          backgroundColor: '#111008',
+          useCORS: true,
+          logging: false,
         });
+
+        const blob = await new Promise((resolve) =>
+          canvas.toBlob((b) => resolve(b), 'image/png', 0.95)
+        );
+
+        if (!blob) {
+          toast(t('msg_image_failed'));
+          return;
+        }
+
+        const safeNum = (S.inv.number || 'factura').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const filename = `${safeNum}.png`;
+
+        // Attempt clipboard write first — most desktop browsers support
+        // this and it's the most intuitive flow for sharing in Discord
+        // / WhatsApp web / etc. (paste with Ctrl+V into the chat input).
+        if (navigator.clipboard && window.ClipboardItem) {
+          try {
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+            toast(t('msg_copied_image'));
+            return;
+          } catch (_) {
+            // Fall through to download. Common reasons: insecure
+            // context (http), Safari (ClipboardItem missing or
+            // restricted), or user denied permissions.
+          }
+        }
+
+        // Download fallback. Triggers Save / Photos prompt on iOS so
+        // the user can attach the image to a chat from there.
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast(t('msg_image_downloaded'));
+      } catch (err) {
+        console.error('Image copy failed:', err);
+        toast(t('msg_image_failed'));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
     });
 
     /* Share: copy code to clipboard */

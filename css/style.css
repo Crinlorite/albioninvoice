@@ -686,8 +686,59 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
    screens the footer stacks and gets taller, so the scrollers give
    it a bigger clearance there. */
 @media (max-width: 700px) {
-  .form-scroll { padding-bottom: 140px; }
-  .preview-panel { padding-bottom: 140px; }
+  .form-scroll { padding-bottom: 180px; }
+  .preview-panel { padding-bottom: 180px; }
+}
+
+/* ══ Mobile layout overhaul (≤720px) ════════════════════════════════
+   The 3-pane desktop layout (sticky form-left + scrolling preview
+   + sticky form-right above 1500px) breaks below ~720px because the
+   form-panel keeps its 400px width and pushes the preview off-screen.
+   Below this breakpoint we collapse everything into a single vertical
+   scroll: form on top, preview below, fixed action footer at the
+   bottom. Inputs bump to 16px min-font so iOS Safari stops auto-
+   zooming on focus. */
+@media (max-width: 720px) {
+  .layout {
+    flex-direction: column;
+    padding-top: 44px;
+  }
+
+  .form-panel {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--form-bord);
+  }
+
+  .form-scroll {
+    overflow: visible;
+    padding: 16px 14px 28px;
+  }
+
+  .preview-panel {
+    flex: 1 1 auto;
+    overflow: visible;
+    padding: 16px 12px 200px;
+  }
+
+  /* Invoice itself — rein in its desktop 50px/56px padding so the
+     full sheet fits comfortably on a 360-414px viewport. */
+  .invoice {
+    width: 100%;
+    padding: 24px 18px;
+  }
+
+  /* iOS Safari zooms in when an <input> font-size is below 16px on
+     focus. Bumping every form control to 16px prevents the layout
+     jumping each time the user taps a field. */
+  .form-panel input,
+  .form-panel select,
+  .form-panel textarea {
+    font-size: 16px;
+  }
 }
 
 .crintech-family .family-label {
@@ -790,8 +841,8 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   /* Narrow: stack the footer — actions on top, family strip below. */
   .crintech-family {
     grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 10px 14px;
+    gap: 8px;
+    padding: 10px 12px env(safe-area-inset-bottom, 12px);
   }
   .crintech-family .family-side {
     justify-self: center;
@@ -801,23 +852,32 @@ input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cur
   .crintech-family .family-links {
     justify-content: center;
     gap: 4px 12px;
+    font-size: 12px;
   }
   .crintech-family .family-actions {
     order: -1;
     width: 100%;
     justify-self: stretch;
     gap: 6px;
+    flex-wrap: wrap;
   }
+  /* Primary "📸 Copiar imagen" pops to a full row on top — main CTA
+     for mobile users who came to share, not to fiddle with codes. */
   .crintech-family .family-export {
     flex: 1 1 100%;
-    padding: 11px 18px;
+    padding: 12px 18px;
+    font-size: 13px;
+    letter-spacing: 2px;
   }
+  /* Three secondary buttons split equally on the row below. Tap
+     targets stay above the 44px Apple HIG minimum. */
   .crintech-family .family-share-btn {
     flex: 1 1 0;
-    min-width: 80px;
-    padding: 8px 10px;
+    min-width: 0;
+    padding: 10px 6px;
     font-size: 10px;
-    letter-spacing: 1.4px;
+    letter-spacing: 1.2px;
+    min-height: 44px;
   }
 }
 

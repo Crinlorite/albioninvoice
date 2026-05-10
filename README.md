@@ -2,7 +2,7 @@
 
 Generador de facturas temático para **Albion Online**. Crea, personaliza y exporta facturas con estética medieval oscura para gestionar préstamos de plata, alquiler de islas, servicios de guild y cualquier concepto facturable entre jugadores o clanes.
 
-**[→ aoinvoice.crintech.pro](https://aoinvoice.crintech.pro)**
+**[→ aoinvoice.app](https://aoinvoice.app)**
 
 ---
 
@@ -55,7 +55,7 @@ Desplegado en **Cloudflare Pages** desde este repositorio.
 
 - Build command: *(vacío)*
 - Output directory: `/`
-- Dominio: `aoinvoice.crintech.pro` — CNAME DNS only (sin proxy)
+- Dominio: `aoinvoice.app` — CNAME DNS only (sin proxy)
 
 ---
 

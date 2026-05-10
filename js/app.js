@@ -922,7 +922,7 @@
           'color: rgba(232, 217, 176, 0.55)',
         ].join(';');
         footer.appendChild(span(
-          (isEs ? 'Generado en' : 'Generated at') + ' aoinvoice.crintech.pro',
+          (isEs ? 'Generado en' : 'Generated at') + ' aoinvoice.app',
           '',
         ));
         footer.appendChild(span(

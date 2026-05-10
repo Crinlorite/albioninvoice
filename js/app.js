@@ -831,12 +831,22 @@
       btn.textContent = '⏳ ...';
 
       try {
-        const canvas = await html2canvas(el, {
-          scale: 2,
-          backgroundColor: '#111008',
-          useCORS: true,
-          logging: false,
-        });
+        // html2canvas is bundled INSIDE html2pdf.bundle.min.js but not
+        // exposed as a global. Use html2pdf's chain API to render the
+        // canvas, then pull it out with .get('canvas'). Same renderer,
+        // same options, no extra dependency.
+        const canvas = await html2pdf()
+          .set({
+            html2canvas: {
+              scale: 2,
+              backgroundColor: '#111008',
+              useCORS: true,
+              logging: false,
+            },
+          })
+          .from(el)
+          .toCanvas()
+          .get('canvas');
 
         const blob = await new Promise((resolve) =>
           canvas.toBlob((b) => resolve(b), 'image/png', 0.95)

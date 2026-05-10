@@ -831,27 +831,51 @@
       btn.textContent = '⏳ ...';
 
       try {
-        // Use vendored html2canvas directly. Previous attempts via the
-        // html2pdf chain padded the canvas to A4 dimensions because
-        // html2pdf's internal toContainer() wraps the source in a
-        // paper-sized div before rendering — even with custom jsPDF
-        // format hacks the right margin came back white. Direct call
-        // = the canvas matches the source element exactly, no padding.
-        // html2canvas computes width/height from the element itself,
-        // we just hand it the node.
-        const canvas = await html2canvas(el, {
-          scale: 2,
-          backgroundColor: '#111008',
-          useCORS: true,
-          logging: false,
-          // Match the element's bounding box exactly. Without these
-          // html2canvas occasionally inherits the viewport's width
-          // (rounding up to fit other rendered elements off-screen).
-          width: el.offsetWidth,
-          height: el.offsetHeight,
-          windowWidth: el.offsetWidth,
-          windowHeight: el.offsetHeight,
-        });
+        // Bulletproof tight-crop: clone the invoice into an off-screen
+        // wrapper sized to the source's exact offset dimensions, then
+        // render the wrapper. Previous attempts — letting html2canvas
+        // infer dimensions or passing width/windowWidth options —
+        // still inherited extra space from the parent's scrollWidth
+        // (preview-panel is wider than the invoice on desktop and
+        // html2canvas walks up the layout to determine the capture
+        // box). With an isolated wrapper there's nothing to inherit
+        // from; the canvas dimensions equal the wrapper's, period.
+        const w = el.offsetWidth;
+        const h = el.offsetHeight;
+
+        const wrapper = document.createElement('div');
+        // position:fixed + left:-99999 keeps the clone off-screen so
+        // there's no visible flash. zero margin/padding so the clone
+        // sits at (0,0) inside the wrapper without any drift.
+        wrapper.style.cssText = `
+          position: fixed;
+          left: -99999px;
+          top: 0;
+          margin: 0;
+          padding: 0;
+          width: ${w}px;
+          height: ${h}px;
+          overflow: hidden;
+          background: #111008;
+        `;
+        const clone = el.cloneNode(true);
+        clone.style.margin = '0';
+        clone.style.maxWidth = 'none';
+        clone.style.width = w + 'px';
+        wrapper.appendChild(clone);
+        document.body.appendChild(wrapper);
+
+        let canvas;
+        try {
+          canvas = await html2canvas(wrapper, {
+            scale: 2,
+            backgroundColor: '#111008',
+            useCORS: true,
+            logging: false,
+          });
+        } finally {
+          document.body.removeChild(wrapper);
+        }
 
         const blob = await new Promise((resolve) =>
           canvas.toBlob((b) => resolve(b), 'image/png', 0.95)

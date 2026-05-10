@@ -831,45 +831,115 @@
       btn.textContent = '⏳ ...';
 
       try {
-        // Bulletproof tight-crop: clone the invoice into an off-screen
-        // wrapper sized to the source's exact offset dimensions, then
-        // render the wrapper. Previous attempts — letting html2canvas
-        // infer dimensions or passing width/windowWidth options —
-        // still inherited extra space from the parent's scrollWidth
-        // (preview-panel is wider than the invoice on desktop and
-        // html2canvas walks up the layout to determine the capture
-        // box). With an isolated wrapper there's nothing to inherit
-        // from; the canvas dimensions equal the wrapper's, period.
+        // Branded export: wrap the invoice clone in a Crintech-themed
+        // header + footer (mirrors royalforge's BuildExportFrame chrome)
+        // so an image pasted in Discord/WhatsApp reads as "Crintech
+        // family tool" instead of a stray screenshot. The off-screen
+        // wrapper at left:-99999px also fixes the prior tight-crop
+        // bug — html2canvas can't pull in layout from a wider parent
+        // because the wrapper IS the parent here.
         const w = el.offsetWidth;
-        const h = el.offsetHeight;
+        const isEs = S.lang === 'es';
+        const PAD_H = 32;
+        const PAD_V = 24;
 
         const wrapper = document.createElement('div');
-        // position:fixed + left:-99999 keeps the clone off-screen so
-        // there's no visible flash. zero margin/padding so the clone
-        // sits at (0,0) inside the wrapper without any drift.
-        wrapper.style.cssText = `
-          position: fixed;
-          left: -99999px;
-          top: 0;
-          margin: 0;
-          padding: 0;
-          width: ${w}px;
-          height: ${h}px;
-          overflow: hidden;
-          background: #111008;
-        `;
+        wrapper.style.cssText = [
+          'position: fixed',
+          'left: -99999px',
+          'top: 0',
+          'margin: 0',
+          `padding: ${PAD_V}px ${PAD_H}px`,
+          `width: ${w + PAD_H * 2}px`,
+          'background: linear-gradient(180deg, #15110a 0%, #0c0a07 100%)',
+          "font-family: 'Cinzel', 'EB Garamond', Georgia, serif",
+          'color: #e8d9b0',
+          'display: flex',
+          'flex-direction: column',
+          'gap: 18px',
+          'box-sizing: border-box',
+        ].join(';');
+
+        // Tiny helper — build a styled <span> with text content. Keeps
+        // each branding piece declarative without innerHTML.
+        const span = (text, css) => {
+          const s = document.createElement('span');
+          s.style.cssText = css;
+          s.textContent = text;
+          return s;
+        };
+
+        const header = document.createElement('div');
+        header.style.cssText = [
+          'display: flex',
+          'align-items: baseline',
+          'gap: 14px',
+          'padding-bottom: 14px',
+          'border-bottom: 1px solid rgba(201, 162, 39, 0.35)',
+        ].join(';');
+        header.appendChild(span('Albion Invoice', [
+          "font-family: 'Cinzel', serif",
+          'font-size: 22px',
+          'font-weight: 600',
+          'letter-spacing: 0.08em',
+          'color: #c9a227',
+          'text-shadow: 0 0 14px rgba(201, 162, 39, 0.35)',
+        ].join(';')));
+        header.appendChild(span('⚔', [
+          'color: #9db8d2',
+          'font-size: 14px',
+          'letter-spacing: 0.3em',
+        ].join(';')));
+        header.appendChild(span(isEs ? 'Por Crintech Studios' : 'By Crintech Studios', [
+          "font-family: 'Cinzel', serif",
+          'font-size: 11px',
+          'font-weight: 600',
+          'letter-spacing: 0.22em',
+          'text-transform: uppercase',
+          'color: rgba(232, 217, 176, 0.7)',
+        ].join(';')));
+
+        // Cloned invoice — centred horizontally inside the wrapper.
         const clone = el.cloneNode(true);
-        clone.style.margin = '0';
+        clone.style.margin = '0 auto';
         clone.style.maxWidth = 'none';
         clone.style.width = w + 'px';
-        wrapper.appendChild(clone);
+        const cloneHost = document.createElement('div');
+        cloneHost.style.cssText = 'display: flex; justify-content: center';
+        cloneHost.appendChild(clone);
+
+        const footer = document.createElement('div');
+        footer.style.cssText = [
+          'padding-top: 12px',
+          'border-top: 1px solid rgba(201, 162, 39, 0.35)',
+          'display: flex',
+          'justify-content: space-between',
+          'align-items: center',
+          "font-family: 'Cinzel', serif",
+          'font-size: 10px',
+          'letter-spacing: 0.18em',
+          'text-transform: uppercase',
+          'color: rgba(232, 217, 176, 0.55)',
+        ].join(';');
+        footer.appendChild(span(
+          (isEs ? 'Generado en' : 'Generated at') + ' aoinvoice.crintech.pro',
+          '',
+        ));
+        footer.appendChild(span(
+          '⚔ ' + (isEs ? 'Herramienta gratuita Crintech' : 'Free Crintech tool') + ' ⚔',
+          'color: #c9a227',
+        ));
+
+        wrapper.appendChild(header);
+        wrapper.appendChild(cloneHost);
+        wrapper.appendChild(footer);
         document.body.appendChild(wrapper);
 
         let canvas;
         try {
           canvas = await html2canvas(wrapper, {
             scale: 2,
-            backgroundColor: '#111008',
+            backgroundColor: null, // honour the wrapper's own gradient
             useCORS: true,
             logging: false,
           });

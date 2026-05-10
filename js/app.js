@@ -815,7 +815,13 @@
        Chrome/Edge/Firefox. Safari-iOS and any browser without
        ClipboardItem fall back to a PNG download so the user can still
        share it from the Files / Photos app. */
-    document.getElementById('btn-copy-image').addEventListener('click', async () => {
+    // Guard against stale HTML / SW caches: if the button id mismatches
+    // because the user is mid-rollout (new JS + old HTML or vice-versa),
+    // a missing element used to throw and abort the rest of init() —
+    // which left the invoice preview blank because the render call below
+    // never ran. Bail silently instead.
+    const btnCopyImage = document.getElementById('btn-copy-image');
+    if (btnCopyImage) btnCopyImage.addEventListener('click', async () => {
       const el = document.querySelector('#invoice-root .invoice');
       if (!el) return;
 

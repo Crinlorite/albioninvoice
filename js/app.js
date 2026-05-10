@@ -831,36 +831,27 @@
       btn.textContent = '⏳ ...';
 
       try {
-        // html2pdf bundles html2canvas internally but doesn't expose
-        // it on window — we have to go through the chain API. Without
-        // a custom jsPDF format, the chain wraps the element in an A4
-        // container, padding the right side with empty white when the
-        // invoice is narrower than 210mm. Set unit:'px' + format to
-        // the element's exact rendered dimensions so the container is
-        // sized to the source and the captured canvas is tight to the
-        // invoice with zero padding.
-        const w = el.offsetWidth;
-        const h = el.offsetHeight;
-
-        const canvas = await html2pdf()
-          .set({
-            margin: 0,
-            html2canvas: {
-              scale: 2,
-              backgroundColor: '#111008',
-              useCORS: true,
-              logging: false,
-            },
-            jsPDF: {
-              unit: 'px',
-              format: [w, h],
-              orientation: w > h ? 'landscape' : 'portrait',
-              hotfixes: ['px_scaling'],
-            },
-          })
-          .from(el)
-          .toCanvas()
-          .get('canvas');
+        // Use vendored html2canvas directly. Previous attempts via the
+        // html2pdf chain padded the canvas to A4 dimensions because
+        // html2pdf's internal toContainer() wraps the source in a
+        // paper-sized div before rendering — even with custom jsPDF
+        // format hacks the right margin came back white. Direct call
+        // = the canvas matches the source element exactly, no padding.
+        // html2canvas computes width/height from the element itself,
+        // we just hand it the node.
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          backgroundColor: '#111008',
+          useCORS: true,
+          logging: false,
+          // Match the element's bounding box exactly. Without these
+          // html2canvas occasionally inherits the viewport's width
+          // (rounding up to fit other rendered elements off-screen).
+          width: el.offsetWidth,
+          height: el.offsetHeight,
+          windowWidth: el.offsetWidth,
+          windowHeight: el.offsetHeight,
+        });
 
         const blob = await new Promise((resolve) =>
           canvas.toBlob((b) => resolve(b), 'image/png', 0.95)

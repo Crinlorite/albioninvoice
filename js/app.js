@@ -24,17 +24,20 @@
     return new Date().getFullYear();
   }
 
+  // fmtDate y fmtAmount se interpolan en innerHTML; ambos rutas (parseada y
+  // de fallback) escapan su salida porque el valor puede venir de un ?inv=
+  // compartido y no pasa por esc() en el sitio de inyección.
   function fmtDate(iso) {
     if (!iso) return '';
     const [y, m, d] = iso.split('-');
-    if (!y || !m || !d) return iso;
-    return `${d}/${m}/${y}`;
+    if (!y || !m || !d) return esc(iso);
+    return esc(`${d}/${m}/${y}`);
   }
 
   function fmtAmount(val) {
     const raw = String(val ?? '').replace(/[^\d.]/g, '');
     const n = parseFloat(raw);
-    if (isNaN(n)) return String(val ?? '');
+    if (isNaN(n)) return esc(String(val ?? ''));
     return n.toLocaleString('es-ES');
   }
 
@@ -442,8 +445,9 @@
     }
 
     /* Footer */
-    const footerLine = S.footer.text ||
-      `${S.emisor.name ? esc(S.emisor.name) + ' · ' : ''}Albion Online`;
+    const footerLine = S.footer.text
+      ? esc(S.footer.text)
+      : `${S.emisor.name ? esc(S.emisor.name) + ' · ' : ''}Albion Online`;
     h += `<div class="inv-footer">
       <div class="inv-sword">⚔</div>
       <div class="inv-footer-brand">${footerLine}</div>
